@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Functions.Domain.Utilities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -26,12 +25,8 @@ public class Person
 	[StringLength(maximumLength: 50, MinimumLength = 2)]
 	public string? lastName { get; init; } = null;
 
-	/// <summary>
-	/// Favorite colour - use EnumFlexConverter to deserialize, so that any of
-	/// case-insensitive name string, integer value or integer string will work
-	/// </summary>
-	[JsonConverter(typeof(EnumFlexConverter<Colour>))]
-	public Colour? favColour { get; init; } = null;
+	[RegularExpression("^[A-Za-z]+$")]
+	public string? favColour { get; init; } = null;
 
 	/// <summary>
 	/// Any unrecognized/unexpected fields will be parsed into extension collection (allows for

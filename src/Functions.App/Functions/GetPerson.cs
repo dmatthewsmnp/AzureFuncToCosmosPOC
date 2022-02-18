@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Functions.App.Utilities;
 using Functions.Domain.Models;
 using Functions.Domain.Responses;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
@@ -16,9 +17,11 @@ public class GetPerson
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-    public GetPerson(ILoggerFactory loggerFactory)
+    private readonly CosmosClient _cosmosClient;
+    public GetPerson(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
     {
         _logger = loggerFactory.CreateLogger<GetPerson>();
+        _cosmosClient = cosmosClient;
     }
     #endregion
 
@@ -31,17 +34,31 @@ public class GetPerson
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.InternalServerError, contentType: "application/json", bodyType: typeof(BasicResponse), Description = "Error")]
     public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "persons/{id:guid}")] HttpRequestData req, Guid id)
     {
-        _logger.LogInformation("Received GET request for {id}", id);
-        // TODO: Fetch result
-        return await ResponseFactory.OK<PersonResponse, IEnumerable<Person>>(req, new List<Person>()
+        _logger.LogDebug("Received GET request for {id}", id);
+
+        try
         {
-            new()
+            var container = _cosmosClient.GetContainer("dm-poc-data", "Person"); // TODO: Make DB name configurable?
+            var response = await container.ReadItemAsync<Person>(id.ToString(), new PartitionKey(id.ToString()));
+            if ((int)response.StatusCode >= 200 && (int)response.StatusCode <= 299 && response.Resource != null)
             {
-                id = id,
-                firstName = "First",
-                lastName = "Last",
-                favColour = Colour.Green
+                return await ResponseFactory.Create<PersonResponse, IEnumerable<Person>>(req, new List<Person>() { response.Resource }, HttpStatusCode.OK);
+                // Note: using Resource in payload rather than model means metadata added by Cosmos is included - desired or no?
             }
-        });
+            else
+            {
+                return await ResponseFactory.Create(req, response.StatusCode); // TODO: Replace (or map) status code?
+            }
+        }
+        catch (CosmosException ce)
+        {
+            _logger.LogWarning(ce, "Database declined request");
+            return await ResponseFactory.Create(req, ce.StatusCode); // TODO: Replace (or map) status code?
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving Person");
+            return await ResponseFactory.ServerError(req);
+        }
     }
 }

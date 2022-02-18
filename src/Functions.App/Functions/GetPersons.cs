@@ -6,6 +6,7 @@ using Functions.App.Utilities;
 using Functions.Domain.Models;
 using Functions.Domain.Responses;
 using Functions.Domain.Utilities;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
@@ -17,9 +18,11 @@ public class GetPersons
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-    public GetPersons(ILoggerFactory loggerFactory)
+    private readonly CosmosClient _cosmosClient;
+    public GetPersons(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
     {
-        _logger = loggerFactory.CreateLogger<GetPerson>();
+        _logger = loggerFactory.CreateLogger<GetPersons>();
+        _cosmosClient = cosmosClient;
     }
     #endregion
 
@@ -39,7 +42,7 @@ public class GetPersons
 
         // TODO: Fetch results
 
-        return await ResponseFactory.OK<PersonResponse, IEnumerable<Person>>(req, new List<Person>()
+        return await ResponseFactory.Create<PersonResponse, IEnumerable<Person>>(req, new List<Person>()
         {
             new()
             {
@@ -48,6 +51,6 @@ public class GetPersons
                 lastName = "Last",
                 favColour = favColourEnum
             }
-        });
+        }, HttpStatusCode.OK);
     }
 }

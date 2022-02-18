@@ -6,6 +6,7 @@ using Functions.App.Utilities;
 using Functions.Domain.Exceptions;
 using Functions.Domain.Models;
 using Functions.Domain.Responses;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
@@ -17,9 +18,11 @@ public class PostPerson
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-	public PostPerson(ILoggerFactory loggerFactory)
+	private readonly CosmosClient _cosmosClient;
+	public PostPerson(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
 	{
 		_logger = loggerFactory.CreateLogger<PostPerson>();
+		_cosmosClient = cosmosClient;
 	}
 	#endregion
 
@@ -39,10 +42,24 @@ public class PostPerson
 	{
 		try
 		{
+			// Deserialize request body into Person model:
 			var person = await RequestFactory.DeserializeBody<Person>(req);
-			_logger.LogInformation("Received Person {id} likes {colour}", person.id, person.favColour);
-			// TODO: Upsert person
-			return await ResponseFactory.OK<PersonResponse, IEnumerable<Person>>(req, new List<Person>() { person });
+			_logger.LogDebug("Received Person {id}", person.id);
+
+			// Perform upsert of object in container:
+			var container = _cosmosClient.GetContainer("dm-poc-data", "Person"); // TODO: Make DB name configurable?
+			var response = await container.UpsertItemAsync(person);
+			if ((int)response.StatusCode >= 200 && (int)response.StatusCode <= 299 && response.Resource != null)
+			{
+				_logger.LogInformation("Person {id} {HttpMethod} DB result {StatusCode}", person.id, req.Method, response.StatusCode);
+				return await ResponseFactory.Create<PersonResponse, IEnumerable<Person>>(req, new List<Person>() { response.Resource }, response.StatusCode);
+				// Note: using Resource in payload rather than model means metadata added by Cosmos is included - desired or no?
+			}
+			else
+			{
+				_logger.LogWarning("Person {id} {HttpMethod} DB result {StatusCode}", person.id, req.Method, response.StatusCode);
+				return await ResponseFactory.Create(req, response.StatusCode); // TODO: Replace (or map) status code? Use standard value for DB decline?
+			}
 		}
 		catch (ModelValidationException ve)
 		{

@@ -13,26 +13,26 @@ namespace Functions.App.Utilities;
 public static class ResponseFactory
 {
 	/// <summary>
-	/// Create an HTTP 200 OK response with default BasicResponse model
+	/// Create an HttpResponseData object with default BasicResponse model
 	/// </summary>
-	public static async Task<HttpResponseData> OK(HttpRequestData req)
+	public static async Task<HttpResponseData> Create(HttpRequestData req, HttpStatusCode httpStatusCode)
 	{
 		var response = req.CreateResponse();
-		await response.WriteAsJsonAsync(new BasicResponse(req.FunctionContext.InvocationId), HttpStatusCode.OK);
+		await response.WriteAsJsonAsync(new BasicResponse(req.FunctionContext.InvocationId), httpStatusCode);
 		return response;
 	}
 
 	/// <summary>
-	/// Create an HTTP 200 OK response with TypedResponse model using provided payload
+	/// Create an HttpResponseData object with TypedResponse model using provided payload
 	/// </summary>
 	/// <remarks>
 	/// Two types and constraint here are to allow for strongly-typed response classes (for purposes of OpenAPI generation),
 	/// while ensuring that those types are always the correct TypedResponses; consider whether this is necessary
 	/// </remarks>
-	public static async Task<HttpResponseData> OK<TResp, TPayload>(HttpRequestData req, TPayload payload) where TResp : TypedResponse<TPayload>
+	public static async Task<HttpResponseData> Create<TResp, TPayload>(HttpRequestData req, TPayload payload, HttpStatusCode httpStatusCode) where TResp : TypedResponse<TPayload>
 	{
 		var response = req.CreateResponse();
-		await response.WriteAsJsonAsync(new TypedResponse<TPayload>(payload, req.FunctionContext.InvocationId), HttpStatusCode.OK);
+		await response.WriteAsJsonAsync(new TypedResponse<TPayload>(payload, req.FunctionContext.InvocationId), httpStatusCode);
 		return response;
 	}
 

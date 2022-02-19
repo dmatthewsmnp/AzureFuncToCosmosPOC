@@ -25,7 +25,9 @@ public class Person
 	[StringLength(maximumLength: 50, MinimumLength = 2)]
 	public string? lastName { get; init; } = null;
 
-	[RegularExpression("^[A-Za-z]+$")]
+	public const string REGEX_COLOUR = "^[A-Za-z]+$";
+
+	[RegularExpression(REGEX_COLOUR)]
 	public string? favColour { get; init; } = null;
 
 	/// <summary>

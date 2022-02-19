@@ -18,6 +18,13 @@ public class ModelValidationException : Exception
 	public IEnumerable<InvalidField> InvalidFields { get; }
 
 	/// <summary>
+	/// Public constructor - initialize InvalidFields list from single ValidationResult
+	/// </summary>
+	public ModelValidationException(ValidationResult validationResult) : base()
+	{
+		InvalidFields = new List<InvalidField>() { new(validationResult.MemberNames.FirstOrDefault(), validationResult.ErrorMessage) };
+	}
+	/// <summary>
 	/// Public constructor - initialize InvalidFields list from ValidationResult list
 	/// </summary>
 	public ModelValidationException(List<ValidationResult> validationResults) : base()

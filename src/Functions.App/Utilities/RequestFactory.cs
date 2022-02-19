@@ -24,7 +24,7 @@ public static class RequestFactory
 			var t = string.IsNullOrEmpty(requestBody) ? null : JsonConvert.DeserializeObject<T>(requestBody);
 			if (t == null)
 			{
-				throw new ModelValidationException(new List<ValidationResult>() { new("A non-empty request body is required") });
+				throw new ModelValidationException(new ValidationResult("A non-empty request body is required"));
 			}
 
 			// Attempt validation - return deserialized object if successful, otherwise generate exception:
@@ -34,7 +34,7 @@ public static class RequestFactory
 		}
 		catch (JsonException)
 		{
-			throw new ModelValidationException(new List<ValidationResult>() { new("Invalid request body") });
+			throw new ModelValidationException(new ValidationResult("Invalid request body"));
 		}
 	}
 }

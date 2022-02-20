@@ -10,7 +10,7 @@ namespace Functions.App
 		public static void Main()
 		{
 			var host = new HostBuilder()
-				.ConfigureFunctionsWorkerDefaults()
+				.ConfigureFunctionsWorkerDefaults(worker => worker.UseNewtonsoftJson()) // Note: without NewtonsoftJson, overflow JSON elements are not properly deserialized
 				.ConfigureServices(services =>
 				{
 					services.AddSingleton(new CosmosClient(System.Environment.GetEnvironmentVariable("CosmosDBConnection")));

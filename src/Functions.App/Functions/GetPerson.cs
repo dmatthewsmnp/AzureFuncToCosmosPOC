@@ -17,11 +17,11 @@ public class GetPerson
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-    private readonly CosmosClient _cosmosClient;
-    public GetPerson(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
+    private readonly CosmosDbUtils _cosmosDbUtils;
+    public GetPerson(ILoggerFactory loggerFactory, CosmosDbUtils cosmosDbUtils)
     {
         _logger = loggerFactory.CreateLogger<GetPerson>();
-        _cosmosClient = cosmosClient;
+        _cosmosDbUtils = cosmosDbUtils;
     }
     #endregion
 
@@ -38,8 +38,7 @@ public class GetPerson
 
         try
         {
-            var container = _cosmosClient.GetContainer("dm-poc-data", "Person"); // TODO: Make DB name configurable?
-            var response = await container.ReadItemAsync<Person>(id.ToString(), new PartitionKey(id.ToString()));
+            var response = await _cosmosDbUtils.GetContainer("Person").ReadItemAsync<Person>(id.ToString(), new PartitionKey(id.ToString()));
             if ((int)response.StatusCode >= 200 && (int)response.StatusCode <= 299 && response.Resource != null)
             {
                 return await ResponseFactory.Create<PersonResponse, IEnumerable<Person>>(req, new List<Person>() { response.Resource }, HttpStatusCode.OK);

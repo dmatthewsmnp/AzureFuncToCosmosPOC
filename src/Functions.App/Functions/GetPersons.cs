@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,12 +21,12 @@ public class GetPersons
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-	private readonly CosmosClient _cosmosClient;
+	private readonly CosmosDbUtils _cosmosDbUtils;
 	private static readonly Regex _regexPersonColour = new(Person.REGEX_COLOUR);
-	public GetPersons(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
+	public GetPersons(ILoggerFactory loggerFactory, CosmosDbUtils cosmosDbUtils)
 	{
 		_logger = loggerFactory.CreateLogger<GetPersons>();
-		_cosmosClient = cosmosClient;
+		_cosmosDbUtils = cosmosDbUtils;
 	}
 	#endregion
 
@@ -75,8 +74,7 @@ public class GetPersons
 			#endregion
 
 			// Open container and execute query:
-			var container = _cosmosClient.GetContainer("dm-poc-data", "Person"); // TODO: Make DB name configurable?
-			var queryIterator = container.GetItemQueryIterator<Person>(query);
+			var queryIterator = _cosmosDbUtils.GetContainer("Person").GetItemQueryIterator<Person>(query);
 			var personList = new List<Person>();
 			while (queryIterator.HasMoreResults)
 			{

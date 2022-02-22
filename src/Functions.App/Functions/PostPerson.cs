@@ -6,7 +6,6 @@ using Functions.App.Utilities;
 using Functions.Domain.Exceptions;
 using Functions.Domain.Models;
 using Functions.Domain.Responses;
-using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
@@ -18,11 +17,11 @@ public class PostPerson
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-	private readonly CosmosClient _cosmosClient;
-	public PostPerson(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
+	private readonly CosmosDbUtils _cosmosDbUtils;
+	public PostPerson(ILoggerFactory loggerFactory, CosmosDbUtils cosmosDbUtils)
 	{
 		_logger = loggerFactory.CreateLogger<PostPerson>();
-		_cosmosClient = cosmosClient;
+		_cosmosDbUtils = cosmosDbUtils;
 	}
 	#endregion
 
@@ -47,8 +46,7 @@ public class PostPerson
 			_logger.LogDebug("Received Person {id}", person.id);
 
 			// Perform upsert of object in container:
-			var container = _cosmosClient.GetContainer("dm-poc-data", "Person"); // TODO: Make DB name configurable?
-			var response = await container.UpsertItemAsync(person);
+			var response = await _cosmosDbUtils.GetContainer("Person").UpsertItemAsync(person);
 			if ((int)response.StatusCode >= 200 && (int)response.StatusCode <= 299 && response.Resource != null)
 			{
 				_logger.LogInformation("Person {id} {HttpMethod} DB result {StatusCode}", person.id, req.Method, response.StatusCode);

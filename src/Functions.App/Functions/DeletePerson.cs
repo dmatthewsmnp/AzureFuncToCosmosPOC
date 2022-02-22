@@ -16,11 +16,11 @@ public class DeletePerson
 {
 	#region Fields and constructor
 	private readonly ILogger _logger;
-    private readonly CosmosClient _cosmosClient;
-    public DeletePerson(ILoggerFactory loggerFactory, CosmosClient cosmosClient)
+    private readonly CosmosDbUtils _cosmosDbUtils;
+    public DeletePerson(ILoggerFactory loggerFactory, CosmosDbUtils cosmosDbUtils)
     {
         _logger = loggerFactory.CreateLogger<DeletePerson>();
-        _cosmosClient = cosmosClient;
+        _cosmosDbUtils = cosmosDbUtils;
     }
     #endregion
 
@@ -38,8 +38,7 @@ public class DeletePerson
         try
         {
             // Perform delete of object in container:
-            var container = _cosmosClient.GetContainer("dm-poc-data", "Person"); // TODO: Make DB name configurable?
-            var response = await container.DeleteItemAsync<Person>(id.ToString(), new PartitionKey(id.ToString()));
+            var response = await _cosmosDbUtils.GetContainer("Person").DeleteItemAsync<Person>(id.ToString(), new PartitionKey(id.ToString()));
             if ((int)response.StatusCode >= 200 && (int)response.StatusCode <= 299)
             {
                 _logger.LogInformation("Person {id} {HttpMethod} DB result {StatusCode}", id, req.Method, response.StatusCode);

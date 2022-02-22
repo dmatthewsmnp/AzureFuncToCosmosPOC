@@ -56,7 +56,7 @@ public class PostPerson
 			else
 			{
 				_logger.LogWarning("Person {id} {HttpMethod} DB result {StatusCode}", person.id, req.Method, response.StatusCode);
-				return await ResponseFactory.Create(req, response.StatusCode); // TODO: Replace (or map) status code? Use standard value for DB decline?
+				return await ResponseFactory.ServerError(req);
 			}
 		}
 		catch (ModelValidationException ve)

@@ -46,13 +46,13 @@ public class GetPerson
             }
             else
             {
-                return await ResponseFactory.Create(req, response.StatusCode); // TODO: Replace (or map) status code?
+                return await ResponseFactory.Create(req, response.StatusCode == HttpStatusCode.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.InternalServerError);
             }
         }
         catch (CosmosException ce)
         {
             _logger.LogWarning(ce, "Database declined request");
-            return await ResponseFactory.Create(req, ce.StatusCode); // TODO: Replace (or map) status code?
+			return await ResponseFactory.Create(req, ce.StatusCode == HttpStatusCode.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.InternalServerError);
         }
         catch (Exception ex)
         {

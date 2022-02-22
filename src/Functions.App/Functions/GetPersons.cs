@@ -91,7 +91,7 @@ public class GetPersons
 		catch (CosmosException ce)
 		{
 			_logger.LogWarning(ce, "Database declined request");
-			return await ResponseFactory.Create(req, ce.StatusCode); // TODO: Replace (or map) status code?
+			return await ResponseFactory.Create(req, ce.StatusCode == HttpStatusCode.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.InternalServerError);
 		}
 		catch (Exception ex)
 		{

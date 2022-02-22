@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Functions.Domain.Models;
 
@@ -29,11 +27,4 @@ public class Person
 
 	[RegularExpression(REGEX_COLOUR)]
 	public string? favColour { get; init; } = null;
-
-	/// <summary>
-	/// Any unrecognized/unexpected fields will be parsed into extension collection (allows for
-	/// this model definition to be out of date with other processes feeding backing datastore)
-	/// </summary>
-	[JsonExtensionData]
-	public Dictionary<string, JToken>? extensionData { get; set; }
 }

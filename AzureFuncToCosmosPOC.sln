@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iac", "iac", "{1FA392B2-F9C1-4CED-BEEB-50176819CA1B}"
 	ProjectSection(SolutionItems) = preProject
 		.devops\iac\.gitignore = .devops\iac\.gitignore
+		.devops\iac\appinsights.tf = .devops\iac\appinsights.tf
 		.devops\iac\cosmosdb.tf = .devops\iac\cosmosdb.tf
 		.devops\iac\functionapp.tf = .devops\iac\functionapp.tf
 		.devops\iac\locals.tf = .devops\iac\locals.tf

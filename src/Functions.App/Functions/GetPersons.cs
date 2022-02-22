@@ -55,7 +55,7 @@ public class GetPersons
 				{
 					throw new ModelValidationException(new ValidationResult("Invalid format", new[] { nameof(favColour) }));
 				}
-				queryBuilder.Append($" WHERE p.favColour = @favColour");
+				queryBuilder.Append($" WHERE StringEquals(p.favColour, @favColour, true)");
 				queryParms["@favColour"] = favColour;
 			}
 			if (PageLimit > 0) // Ignore PageOffset if PageLimit not provided
@@ -81,7 +81,7 @@ public class GetPersons
 				// Add all entries in range to collection:
 				personList.AddRange(await queryIterator.ReadNextAsync());
 			}
-			return await ResponseFactory.Create<PersonResponse, IEnumerable<Person>>(req, personList, HttpStatusCode.NotImplemented);
+			return await ResponseFactory.Create<PersonResponse, IEnumerable<Person>>(req, personList, HttpStatusCode.OK);
 		}
 		catch (ModelValidationException ve)
 		{

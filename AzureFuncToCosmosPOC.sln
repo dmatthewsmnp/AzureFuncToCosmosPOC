@@ -7,6 +7,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functions.Domain", "src\Fun
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Functions.App", "src\Functions.App\Functions.App.csproj", "{3DDE39AF-D150-492B-9D72-66FC7CAC38BE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".devops", ".devops", "{1D7C5619-C933-4A0A-8A20-7CD8B545427D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "iac", "iac", "{1FA392B2-F9C1-4CED-BEEB-50176819CA1B}"
+	ProjectSection(SolutionItems) = preProject
+		.devops\iac\.gitignore = .devops\iac\.gitignore
+		.devops\iac\cosmosdb.tf = .devops\iac\cosmosdb.tf
+		.devops\iac\locals.tf = .devops\iac\locals.tf
+		.devops\iac\main.tf = .devops\iac\main.tf
+		.devops\iac\variables.tf = .devops\iac\variables.tf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,6 +35,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1FA392B2-F9C1-4CED-BEEB-50176819CA1B} = {1D7C5619-C933-4A0A-8A20-7CD8B545427D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2AB3C121-2255-45DC-8779-1EF7A86D7CF7}

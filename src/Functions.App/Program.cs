@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Functions.App.Utilities;
 using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,7 @@ namespace Functions.App
 {
 	public static class Program
 	{
-		public static void Main()
+		public static async Task Main()
 		{
 			var host = new HostBuilder()
 				.ConfigureFunctionsWorkerDefaults(worker => worker.UseNewtonsoftJson()) // Note: without NewtonsoftJson, overflow JSON elements are not properly deserialized
@@ -20,7 +21,7 @@ namespace Functions.App
 				.ConfigureOpenApi()
 				.Build();
 
-			host.Run();
+			await host.RunAsync();
 		}
 	}
 }

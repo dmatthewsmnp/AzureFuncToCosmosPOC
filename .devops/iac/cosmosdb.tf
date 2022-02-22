@@ -1,3 +1,4 @@
+# Create CosmosDB account
 resource "azurerm_cosmosdb_account" "dbacct" {
   name                = "fx-poc"
   location            = azurerm_resource_group.rg.location
@@ -14,17 +15,19 @@ resource "azurerm_cosmosdb_account" "dbacct" {
   }
 }
 
+# Create CosmosDB database
 resource "azurerm_cosmosdb_sql_database" "db" {
-  name                = "${resource.azurerm_cosmosdb_account.dbacct.name}-db"
-  resource_group_name = resource.azurerm_cosmosdb_account.dbacct.resource_group_name
-  account_name        = resource.azurerm_cosmosdb_account.dbacct.name
+  name                = "${azurerm_cosmosdb_account.dbacct.name}-db"
+  resource_group_name = azurerm_cosmosdb_account.dbacct.resource_group_name
+  account_name        = azurerm_cosmosdb_account.dbacct.name
 }
 
+# Create CosmosDB container for Person objects
 resource "azurerm_cosmosdb_sql_container" "person" {
   name                  = "Person"
-  resource_group_name   = resource.azurerm_cosmosdb_account.dbacct.resource_group_name
-  account_name          = resource.azurerm_cosmosdb_account.dbacct.name
-  database_name         = resource.azurerm_cosmosdb_sql_database.db.name
+  resource_group_name   = azurerm_cosmosdb_account.dbacct.resource_group_name
+  account_name          = azurerm_cosmosdb_account.dbacct.name
+  database_name         = azurerm_cosmosdb_sql_database.db.name
   partition_key_path    = "/id"
   partition_key_version = 1 # Partition key will not be over 101 bytes
 }

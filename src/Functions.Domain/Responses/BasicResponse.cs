@@ -13,7 +13,7 @@ public class BasicResponse
 
 	public BasicResponse(string? traceId)
 	{
-		serverTimestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+		serverTimestamp = DateTime.UtcNow.ToString("O");
 		this.traceId = traceId;
 	}
 }

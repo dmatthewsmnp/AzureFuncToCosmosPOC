@@ -41,10 +41,11 @@ public class GetPersons
 	public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "persons")] HttpRequestData req,
 		string? favColour = null, int? PageLimit = null, int? PageOffset = null)
 	{
-		_logger.LogDebug("Received GET request [{favColour}:{PageLimit}:{PageOffset}]", favColour, PageLimit, PageOffset);
-
+		using var logscope = _logger.BeginScope(new Dictionary<string, object?>() { { "TraceID", req.FunctionContext.InvocationId } });
 		try
 		{
+			_logger.LogDebug("Received GET request [{favColour}:{PageLimit}:{PageOffset}]", favColour, PageLimit, PageOffset);
+
 			#region Build SQL query definition
 			var queryBuilder = new StringBuilder("SELECT * FROM Person p");
 			var queryParms = new Dictionary<string, object>();
@@ -87,11 +88,6 @@ public class GetPersons
 		{
 			_logger.LogDebug("Request validation failed {@InvalidFields}", ve.InvalidFields);
 			return await ResponseFactory.BadRequest(req, ve.InvalidFields);
-		}
-		catch (CosmosException ce)
-		{
-			_logger.LogWarning(ce, "Database declined request");
-			return await ResponseFactory.Create(req, ce.StatusCode == HttpStatusCode.NotFound ? HttpStatusCode.NotFound : HttpStatusCode.InternalServerError);
 		}
 		catch (Exception ex)
 		{

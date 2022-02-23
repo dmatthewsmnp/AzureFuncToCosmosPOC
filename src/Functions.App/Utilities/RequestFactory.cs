@@ -13,12 +13,11 @@ namespace Functions.App.Utilities;
 public static class RequestFactory
 {
 	/// <summary>
-	/// Read request payload, attempt deserialization into an object of class T and perform model validation
+	/// Attempt deserialization into an object of class T and perform model validation
 	/// </summary>
 	/// <exception cref="ModelValidationException">Thrown if invalid data received or model validation fails</exception>
-	public static async Task<T> DeserializeBody<T>(HttpRequestData req) where T : class
+	public static T DeserializeBody<T>(string? requestBody) where T : class
 	{
-		var requestBody = await req.ReadAsStringAsync();
 		try
 		{
 			var t = string.IsNullOrEmpty(requestBody) ? null : JsonConvert.DeserializeObject<T>(requestBody);
@@ -36,5 +35,15 @@ public static class RequestFactory
 		{
 			throw new ModelValidationException(new ValidationResult("Invalid request body"));
 		}
+	}
+
+	/// <summary>
+	/// Read request payload, attempt deserialization into an object of class T and perform model validation
+	/// </summary>
+	/// <exception cref="ModelValidationException">Thrown if invalid data received or model validation fails</exception>
+	public static async Task<T> DeserializeBody<T>(HttpRequestData req) where T : class
+	{
+		// Retrieve request payload and hand off logic to overload:
+		return DeserializeBody<T>(await req.ReadAsStringAsync());
 	}
 }

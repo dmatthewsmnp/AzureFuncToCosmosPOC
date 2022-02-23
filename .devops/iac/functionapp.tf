@@ -51,7 +51,8 @@ resource "azurerm_function_app" "funcapp" {
     APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.appinsights.instrumentation_key
     CosmosDBConnection             = "AccountEndpoint=${azurerm_cosmosdb_account.dbacct.endpoint};AccountKey=${azurerm_cosmosdb_account.dbacct.primary_master_key};"
     DBName                         = "fx-poc-db"
-
+    # Trim EntityPath off end of connection string (FunctionApp chokes if this is present):
+    AzureWebJobsServiceBus = trimsuffix("${azurerm_servicebus_queue_authorization_rule.sbclientqueueauthrule.primary_connection_string}", ";EntityPath=${azurerm_servicebus_queue.sbclientqueue.name}")
   }
 
   site_config {

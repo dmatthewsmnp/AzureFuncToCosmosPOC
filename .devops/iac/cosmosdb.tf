@@ -31,3 +31,13 @@ resource "azurerm_cosmosdb_sql_container" "person" {
   partition_key_path    = "/id"
   partition_key_version = 1 # Partition key will not be over 101 bytes
 }
+
+# Create CosmosDB container for Client objects
+resource "azurerm_cosmosdb_sql_container" "client" {
+  name                  = "Client"
+  resource_group_name   = azurerm_cosmosdb_account.dbacct.resource_group_name
+  account_name          = azurerm_cosmosdb_account.dbacct.name
+  database_name         = azurerm_cosmosdb_sql_database.db.name
+  partition_key_path    = "/ClientId"
+  partition_key_version = 1 # Partition key will not be over 101 bytes
+}

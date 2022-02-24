@@ -40,6 +40,9 @@ resource "azurerm_function_app" "funcapp" {
   storage_account_name       = azurerm_storage_account.storage.name
   storage_account_access_key = azurerm_storage_account.storage.primary_access_key
   version                    = "~4"
+  identity {
+    type = "SystemAssigned"
+  }
 
   app_settings = {
 
@@ -49,10 +52,10 @@ resource "azurerm_function_app" "funcapp" {
 
     # Dynamic values from other resources:
     APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.appinsights.instrumentation_key
-    CosmosDBConnection             = "AccountEndpoint=${azurerm_cosmosdb_account.dbacct.endpoint};AccountKey=${azurerm_cosmosdb_account.dbacct.primary_master_key};"
+    CosmosDBConnection             = "AccountEndpoint=${azurerm_cosmosdb_account.dbacct.endpoint};AccountKey=${azurerm_cosmosdb_account.dbacct.primary_master_key};" # TODO: REMOVE ONCE RBAC WORKING
+    CosmosDBEndpoint               = azurerm_cosmosdb_account.dbacct.endpoint
     DBName                         = "fx-poc-db"
-    # Trim EntityPath off end of connection string (FunctionApp chokes if this is present):
-    AzureWebJobsServiceBus = trimsuffix("${azurerm_servicebus_queue_authorization_rule.sbclientqueueauthrule.primary_connection_string}", ";EntityPath=${azurerm_servicebus_queue.sbclientqueue.name}")
+    AzureWebJobsServiceBus         = join("", [regex("^Endpoint=sb://.+\\.windows.net/;", azurerm_servicebus_namespace.sbnamespace.default_primary_connection_string), "Authentication=ManagedIdentity"])
   }
 
   site_config {
@@ -65,3 +68,14 @@ resource "azurerm_function_app" "funcapp" {
     ]
   }
 }
+
+# Grant function app Reader role in Service Bus queue (to read incoming events)
+resource "azurerm_role_assignment" "funcapp_queue_role" {
+  scope                = azurerm_servicebus_queue.sbclientqueue.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
+}
+
+# TODO: Grant role "Cosmos DB Built-in Data Contributor" (role definition ID 00000000-0000-0000-0000-000000000002) to
+# azurerm_function_app.funcapp.identity.0.principal_id. Terraform does not yet support assigning CosmosDB roles, see
+# issue: https://github.com/hashicorp/terraform-provider-azurerm/issues/13907

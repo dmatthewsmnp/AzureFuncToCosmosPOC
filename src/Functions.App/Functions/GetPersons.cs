@@ -59,12 +59,9 @@ public class GetPersons
 				queryBuilder.Append($" WHERE StringEquals(p.favColour, @favColour, true)");
 				queryParms["@favColour"] = favColour;
 			}
-			if (PageLimit > 0) // Ignore PageOffset if PageLimit not provided
-			{
-				queryBuilder.Append($" OFFSET @PageOffset LIMIT @PageLimit");
-				queryParms["@PageOffset"] = PageOffset ?? 0;
-				queryParms["@PageLimit"] = PageLimit;
-			}
+			queryBuilder.Append($" OFFSET @PageOffset LIMIT @PageLimit");
+			queryParms["@PageOffset"] = PageOffset ?? 0;
+			queryParms["@PageLimit"] = PageLimit ?? 1000;
 
 			// Construct query definition object and apply parameters (if any):
 			var query = new QueryDefinition(queryBuilder.ToString());

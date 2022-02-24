@@ -47,15 +47,15 @@ public class DeletePerson
 			_logger.LogInformation("DeleteItemAsync<Person> result {StatusCode}", response.StatusCode);
 			return await ResponseFactory.Create(req, HttpStatusCode.OK); // Typically would be HTTP 204, but we want to include response content
 		}
-        catch (CosmosException ce) when (ce.StatusCode == HttpStatusCode.NotFound)
-        {
-            _logger.LogInformation("Person not found");
-            return await ResponseFactory.Create(req, HttpStatusCode.NotFound);
-}
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting Person");
-            return await ResponseFactory.ServerError(req);
-        }
-    }
+		catch (CosmosException ce) when (ce.StatusCode == HttpStatusCode.NotFound)
+		{
+			_logger.LogInformation("Person not found");
+			return await ResponseFactory.Create(req, HttpStatusCode.NotFound);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, "Error deleting Person");
+			return await ResponseFactory.ServerError(req);
+		}
+	}
 }

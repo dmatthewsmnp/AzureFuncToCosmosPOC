@@ -16,12 +16,3 @@ resource "azurerm_servicebus_queue" "sbclientqueue" {
   namespace_id        = azurerm_servicebus_namespace.sbnamespace.id
   enable_partitioning = true
 }
-
-resource "azurerm_servicebus_queue_authorization_rule" "sbclientqueueauthrule" {
-  name     = "fx_poc_client_queue_authrule"
-  queue_id = azurerm_servicebus_queue.sbclientqueue.id
-
-  listen = true
-  send   = false
-  manage = false
-}

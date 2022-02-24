@@ -16,6 +16,7 @@ namespace Functions.App
 				{
 					services.AddSingleton(new CosmosDbUtils(
 						System.Environment.GetEnvironmentVariable("CosmosDBConnection"),
+						System.Environment.GetEnvironmentVariable("CosmosDBEndpoint"),
 						System.Environment.GetEnvironmentVariable("DBName")));
 				})
 				.ConfigureOpenApi()

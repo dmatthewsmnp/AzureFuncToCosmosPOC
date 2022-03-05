@@ -12,17 +12,23 @@ resource "azurerm_servicebus_namespace" "sbnamespace" {
   }
 }
 
-# Create client queue:
-resource "azurerm_servicebus_queue" "sbclientqueue" {
-  name                = "fx_poc_client_queue"
-  namespace_id        = azurerm_servicebus_namespace.sbnamespace.id
-  enable_partitioning = true
+# Create mpm/client topic
+resource "azurerm_servicebus_topic" "mpm_client" {
+  name         = "mpm~client~v1"
+  namespace_id = azurerm_servicebus_namespace.sbnamespace.id
+}
+
+# Create mpm/client topic subscription:
+resource "azurerm_servicebus_subscription" "dih_mpm_client_sub" {
+  name               = "dih_mpm_client_sub"
+  topic_id           = azurerm_servicebus_topic.mpm_client.id
+  max_delivery_count = 1
 }
 
 # Create sending authorization rule for use by on-prem IntegrationEventRelay (may be replaced by RBAC later):
-resource "azurerm_servicebus_queue_authorization_rule" "sbclientqueueauthwriter" {
-  name     = "fx_poc_client_queue_authwriter"
-  queue_id = azurerm_servicebus_queue.sbclientqueue.id
+resource "azurerm_servicebus_topic_authorization_rule" "mpm_client_send_rule" {
+  name     = "mpm_client_send_key"
+  topic_id = azurerm_servicebus_topic.mpm_client.id
 
   listen = false
   send   = true

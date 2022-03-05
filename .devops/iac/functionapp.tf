@@ -56,6 +56,8 @@ resource "azurerm_function_app" "funcapp" {
     CosmosDBEndpoint               = azurerm_cosmosdb_account.dbacct.endpoint
     DBName                         = "fx-poc-db"
     AzureWebJobsServiceBus         = join("", [regex("^Endpoint=sb://.+\\.windows.net/;", azurerm_servicebus_namespace.sbnamespace.default_primary_connection_string), "Authentication=ManagedIdentity"])
+    ServiceBusTopic                = replace(azurerm_servicebus_topic.mpm_client.name, "~", "/")
+    ServiceBusSubscription         = azurerm_servicebus_subscription.dih_mpm_client_sub.name
   }
 
   site_config {
@@ -70,8 +72,8 @@ resource "azurerm_function_app" "funcapp" {
 }
 
 # Grant function app Reader role in Service Bus queue (to read incoming events)
-resource "azurerm_role_assignment" "funcapp_queue_role" {
-  scope                = azurerm_servicebus_queue.sbclientqueue.id
+resource "azurerm_role_assignment" "funcapp_mpmsub_role" {
+  scope                = azurerm_servicebus_subscription.dih_mpm_client_sub.id
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
 }

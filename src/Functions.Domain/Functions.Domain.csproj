@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="MNP.ServiceFabric.Shared" Version="0.2.0-beta.68894" />
+		<PackageReference Include="MNP.ServiceFabric.Shared" Version="0.2.0-beta.69034" />
 	</ItemGroup>
 
 </Project>

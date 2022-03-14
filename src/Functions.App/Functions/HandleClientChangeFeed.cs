@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Functions.Domain.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -17,17 +18,22 @@ namespace Functions.App.Functions
         #endregion
 
         [Function("HandleClientChangeFeed")]
-        public void Run([CosmosDBTrigger(
-            databaseName: "fx-poc-db",
+        [ServiceBusOutput("dih/client/v1", Connection = "AzureWebJobsServiceBus", EntityType = EntityType.Topic)]
+        public string[] Run([CosmosDBTrigger(
+            databaseName: "%DBName%",
             collectionName: "Client",
-            ConnectionStringSetting = "CosmosDBConnection",
+            ConnectionStringSetting = "CosmosDBTrigCfg",
             LeaseCollectionName = "leases",
             CreateLeaseCollectionIfNotExists = true)] IReadOnlyList<Client> input)
         {
             if (input != null && input.Count > 0)
             {
                 _logger.LogInformation("Documents modified: " + input.Count);
-                _logger.LogInformation("First document Id: " + input[0].id);
+                return input.Select(client => client.id.ToString()).ToArray();
+            }
+            else
+            {
+                return Array.Empty<string>();
             }
         }
     }

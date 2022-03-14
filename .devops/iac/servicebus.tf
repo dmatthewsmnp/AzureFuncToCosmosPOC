@@ -18,6 +18,12 @@ resource "azurerm_servicebus_topic" "mpm_client" {
   namespace_id = azurerm_servicebus_namespace.sbnamespace.id
 }
 
+# Create dih/client topic
+resource "azurerm_servicebus_topic" "dih_client" {
+  name         = "dih~client~v1"
+  namespace_id = azurerm_servicebus_namespace.sbnamespace.id
+}
+
 # Create mpm/client topic subscription:
 resource "azurerm_servicebus_subscription" "dih_mpm_client_sub" {
   name               = "dih_mpm_client_sub"

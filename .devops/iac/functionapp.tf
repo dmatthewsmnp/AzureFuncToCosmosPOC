@@ -71,12 +71,25 @@ resource "azurerm_function_app" "funcapp" {
   }
 }
 
-# Grant function app Reader role in Service Bus queue (to read incoming events)
+# Grant function app Reader role on Service Bus MPM subscription (to read incoming events)
 resource "azurerm_role_assignment" "funcapp_mpmsub_role" {
   scope                = azurerm_servicebus_subscription.dih_mpm_client_sub.id
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
 }
+
+# Grant function app Sender role on Service Bus DIH topic (to write outbound events)
+resource "azurerm_role_assignment" "funcapp_dihtopic_role" {
+  scope                = azurerm_servicebus_topic.dih_client.id
+  role_definition_name = "Azure Service Bus Data Sender"
+  principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
+}
+
+# resource "azurerm_role_assignment" "funcapp_client_container_role" {
+#   scope                = azurerm_cosmosdb_sql_container.client.id
+#   role_definition_name = "DihOdsClientFxRole"
+#   principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
+# }
 
 # TODO: Grant role "Cosmos DB Built-in Data Contributor" (role definition ID 00000000-0000-0000-0000-000000000002) to
 # azurerm_function_app.funcapp.identity.0.principal_id. Terraform does not yet support assigning CosmosDB roles, see

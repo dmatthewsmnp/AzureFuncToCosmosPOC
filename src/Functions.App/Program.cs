@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Functions.App.Utilities;
 using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +9,7 @@ var host = new HostBuilder()
 	{
 		services.AddSingleton(new CosmosDbUtils(
 			System.Environment.GetEnvironmentVariable("CosmosDBConnection"),
-			System.Environment.GetEnvironmentVariable("CosmosDBEndpoint"),
+			System.Environment.GetEnvironmentVariable("CosmosDB__accountEndpoint"),
 			System.Environment.GetEnvironmentVariable("DBName")));
 	})
 	.ConfigureOpenApi()

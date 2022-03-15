@@ -21,10 +21,9 @@ namespace Functions.App.Functions
         [ServiceBusOutput("dih/client/v1", Connection = "AzureWebJobsServiceBus", EntityType = EntityType.Topic)]
         public string[] Run([CosmosDBTrigger(
             databaseName: "%DBName%",
-            collectionName: "Client",
-            ConnectionStringSetting = "CosmosDBTrigCfg",
-            LeaseCollectionName = "leases",
-            CreateLeaseCollectionIfNotExists = true)] IReadOnlyList<Client> input)
+            containerName: "Client",
+            Connection = "CosmosDB",
+            LeaseContainerName = "ClientLeases")] IReadOnlyList<Client> input)
         {
             if (input != null && input.Count > 0)
             {

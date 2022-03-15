@@ -52,8 +52,8 @@ resource "azurerm_function_app" "funcapp" {
 
     # Dynamic values from other resources:
     APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.appinsights.instrumentation_key
-    CosmosDBConnection             = "AccountEndpoint=${azurerm_cosmosdb_account.dbacct.endpoint};AccountKey=${azurerm_cosmosdb_account.dbacct.primary_master_key};" # TODO: REMOVE ONCE RBAC WORKING
-    CosmosDBEndpoint               = azurerm_cosmosdb_account.dbacct.endpoint
+    #CosmosDBConnection             = "AccountEndpoint=${azurerm_cosmosdb_account.dbacct.endpoint};AccountKey=${azurerm_cosmosdb_account.dbacct.primary_master_key};" # TODO: REMOVE ONCE RBAC WORKING
+    CosmosDB__accountEndpoint      = azurerm_cosmosdb_account.dbacct.endpoint
     DBName                         = "fx-poc-db"
     AzureWebJobsServiceBus         = join("", [regex("^Endpoint=sb://.+\\.windows.net/;", azurerm_servicebus_namespace.sbnamespace.default_primary_connection_string), "Authentication=ManagedIdentity"])
     ServiceBusTopic                = replace(azurerm_servicebus_topic.mpm_client.name, "~", "/")
@@ -84,12 +84,6 @@ resource "azurerm_role_assignment" "funcapp_dihtopic_role" {
   role_definition_name = "Azure Service Bus Data Sender"
   principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
 }
-
-# resource "azurerm_role_assignment" "funcapp_client_container_role" {
-#   scope                = azurerm_cosmosdb_sql_container.client.id
-#   role_definition_name = "DihOdsClientFxRole"
-#   principal_id         = azurerm_function_app.funcapp.identity.0.principal_id
-# }
 
 # TODO: Grant role "Cosmos DB Built-in Data Contributor" (role definition ID 00000000-0000-0000-0000-000000000002) to
 # azurerm_function_app.funcapp.identity.0.principal_id. Terraform does not yet support assigning CosmosDB roles, see

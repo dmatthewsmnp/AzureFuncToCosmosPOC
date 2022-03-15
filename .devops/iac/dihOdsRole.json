@@ -2,6 +2,9 @@
 	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
 	"parameters": {
+		"roleName": {
+			"type": "String"
+		},
         "cosmosDbAccountId": {
             "type": "String"
         },
@@ -22,9 +25,31 @@
 		{
 			"type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
 			"apiVersion": "2021-04-15",
-			"name": "[concat(parameters('cosmosDbAccountName'), '/4353444F-494C-4E45-5400-000000000001')]",
+			"name": "[concat(parameters('cosmosDbAccountName'), '/', guid(parameters('cosmosDbAccountId'), 'metaDataReader'))]",
 			"properties": {
-				"roleName": "DihOdsClientFxRole",
+				"roleName": "metaDataReader",
+				"type": "CustomRole",
+				"permissions": [{ "dataActions": ["Microsoft.DocumentDB/databaseAccounts/readMetadata"] }],
+				"assignableScopes": ["[parameters('cosmosDbAccountId')]"]
+			}
+		},
+		{
+			"type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+			"apiVersion": "2021-04-15",
+			"name": "[concat(parameters('cosmosDbAccountName'), '/', guid(parameters('cosmosDbAccountId'), concat(parameters('fxPrincipalId'), 'metaDataReader')))]",
+			"properties": {
+				"roleDefinitionId": "[concat(parameters('cosmosDbAccountId'), '/sqlRoleDefinitions/', guid(parameters('cosmosDbAccountId'), 'metaDataReader'))]",
+				"principalId": "[parameters('fxPrincipalId')]",
+				"scope": "[parameters('cosmosDbAccountId')]"
+			},
+			"dependsOn": ["[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmosDbAccountName'), guid(parameters('cosmosDbAccountId'), 'metaDataReader'))]"]
+		},
+		{
+			"type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
+			"apiVersion": "2021-04-15",
+			"name": "[concat(parameters('cosmosDbAccountName'), '/', guid(parameters('cosmosDbAccountId'), parameters('roleName')))]",
+			"properties": {
+				"roleName": "[parameters('roleName')]",
 				"type": "CustomRole",
 				"permissions": [{
 					"dataActions": [
@@ -45,12 +70,34 @@
 		{
 			"type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
 			"apiVersion": "2021-04-15",
-			"name": "fx-poc/5861db81-48e9-41e3-89c6-8c4101c46821",
+			"name": "[concat(parameters('cosmosDbAccountName'), '/', guid(parameters('cosmosDbAccountId'), concat(parameters('fxPrincipalId'), parameters('cosmosContainerName'))))]",
 			"properties": {
-				"roleDefinitionId": "/subscriptions/5873dc21-d366-4ca4-a7ab-361a370893e3/resourceGroups/AzureFx-CosmosDB-PoC/providers/Microsoft.DocumentDB/databaseAccounts/fx-poc/sqlRoleDefinitions/4353444f-494c-4e45-5400-000000000001",
+				"roleDefinitionId": "[concat(parameters('cosmosDbAccountId'), '/sqlRoleDefinitions/', guid(parameters('cosmosDbAccountId'), parameters('roleName')))]",
 				"principalId": "[parameters('fxPrincipalId')]",
-				"scope": "/subscriptions/5873dc21-d366-4ca4-a7ab-361a370893e3/resourceGroups/AzureFx-CosmosDB-PoC/providers/Microsoft.DocumentDB/databaseAccounts/fx-poc/dbs/fx-poc-db/colls/Client"
-			}
+				"scope": "[concat(parameters('cosmosDbAccountId'), '/dbs/', parameters('cosmosDbName'), '/colls/', parameters('cosmosContainerName'))]"
+			},
+			"dependsOn": ["[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmosDbAccountName'), guid(parameters('cosmosDbAccountId'), parameters('roleName')))]"]
+		},
+		{
+			"type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+			"apiVersion": "2021-04-15",
+			"name": "[concat(parameters('cosmosDbAccountName'), '/', guid(parameters('cosmosDbAccountId'), concat(parameters('fxPrincipalId'), parameters('cosmosContainerName'), 'Leases')))]",
+			"properties": {
+				"roleDefinitionId": "[concat(parameters('cosmosDbAccountId'), '/sqlRoleDefinitions/', guid(parameters('cosmosDbAccountId'), parameters('roleName')))]",
+				"principalId": "[parameters('fxPrincipalId')]",
+				"scope": "[concat(parameters('cosmosDbAccountId'), '/dbs/', parameters('cosmosDbName'), '/colls/', parameters('cosmosContainerName'), 'Leases')]"
+			},
+			"dependsOn": ["[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments', parameters('cosmosDbAccountName'), guid(parameters('cosmosDbAccountId'), concat(parameters('fxPrincipalId'), parameters('cosmosContainerName'))))]"]
 		}
-	]
+	],
+	"outputs": {
+		"cosmosContainerName": {
+			"type": "String",
+			"value": "[parameters('cosmosContainerName')]"
+		},
+		"sqlRoleId": {
+			"type": "String",
+			"value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmosDbAccountName'), guid(parameters('cosmosDbAccountId'), parameters('roleName')))]"
+		}
+	}
 }

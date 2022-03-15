@@ -8,6 +8,9 @@ resource "azurerm_cosmosdb_account" "dbacct" {
   consistency_policy {
     consistency_level = "ConsistentPrefix"
   }
+  capabilities {
+    name = "EnableServerless"
+  }
 
   geo_location {
     location          = azurerm_resource_group.rg.location
@@ -35,6 +38,15 @@ resource "azurerm_cosmosdb_sql_container" "person" {
 # Create CosmosDB container for Client objects
 resource "azurerm_cosmosdb_sql_container" "client" {
   name                  = "Client"
+  resource_group_name   = azurerm_cosmosdb_account.dbacct.resource_group_name
+  account_name          = azurerm_cosmosdb_account.dbacct.name
+  database_name         = azurerm_cosmosdb_sql_database.db.name
+  partition_key_path    = "/id"
+  partition_key_version = 1 # Partition key will not be over 101 bytes
+}
+# Create CosmosDB container for lease management of Client documents (for change feed processor)
+resource "azurerm_cosmosdb_sql_container" "client_leases" {
+  name                  = "ClientLeases"
   resource_group_name   = azurerm_cosmosdb_account.dbacct.resource_group_name
   account_name          = azurerm_cosmosdb_account.dbacct.name
   database_name         = azurerm_cosmosdb_sql_database.db.name

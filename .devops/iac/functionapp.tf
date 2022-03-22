@@ -53,11 +53,11 @@ resource "azurerm_function_app" "funcapp" {
     # Dynamic values from other resources:
     APPINSIGHTS_INSTRUMENTATIONKEY = azurerm_application_insights.appinsights.instrumentation_key
     #CosmosDBConnection             = "AccountEndpoint=${azurerm_cosmosdb_account.dbacct.endpoint};AccountKey=${azurerm_cosmosdb_account.dbacct.primary_master_key};" # TODO: REMOVE ONCE RBAC WORKING
-    CosmosDB__accountEndpoint      = azurerm_cosmosdb_account.dbacct.endpoint
-    DBName                         = "fx-poc-db"
-    AzureWebJobsServiceBus         = join("", [regex("^Endpoint=sb://.+\\.windows.net/;", azurerm_servicebus_namespace.sbnamespace.default_primary_connection_string), "Authentication=ManagedIdentity"])
-    ServiceBusTopic                = replace(azurerm_servicebus_topic.mpm_client.name, "~", "/")
-    ServiceBusSubscription         = azurerm_servicebus_subscription.dih_mpm_client_sub.name
+    CosmosDB__accountEndpoint = azurerm_cosmosdb_account.dbacct.endpoint
+    DBName                    = "fx-poc-db"
+    AzureWebJobsServiceBus    = join("", [regex("^Endpoint=sb://.+\\.windows.net/;", azurerm_servicebus_namespace.sbnamespace.default_primary_connection_string), "Authentication=ManagedIdentity"])
+    ServiceBusTopic           = replace(azurerm_servicebus_topic.mpm_client.name, "~", "/")
+    ServiceBusSubscription    = azurerm_servicebus_subscription.dih_mpm_client_sub.name
   }
 
   site_config {

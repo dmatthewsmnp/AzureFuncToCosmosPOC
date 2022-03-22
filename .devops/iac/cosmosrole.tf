@@ -1,7 +1,7 @@
 resource "azurerm_resource_group_template_deployment" "cosmosdb_client_container_role" {
   name                = "var.cosmosdb_client_container_role"
   resource_group_name = azurerm_resource_group.rg.name
-  tags = var.tags
+  tags                = var.tags
 
   template_content = file("dihOdsRole.json")
   parameters_content = jsonencode({

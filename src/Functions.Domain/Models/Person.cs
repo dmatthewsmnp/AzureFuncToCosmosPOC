@@ -30,6 +30,8 @@ public class Person : IValidatableObject
 	[RegularExpression(REGEX_COLOUR)]
 	public string? favColour { get; init; } = null;
 
+	public string? _etag { internal get; init; }
+
 	/// <summary>
 	/// Custom validation method - ensure "id" property is not set on request
 	/// </summary>

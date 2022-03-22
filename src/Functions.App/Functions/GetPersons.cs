@@ -72,7 +72,7 @@ public class GetPersons
 			#endregion
 
 			// Open container and execute query:
-			var queryIterator = _cosmosDbUtils.GetContainer("Person").GetItemQueryIterator<Person>(query);
+			using var queryIterator = _cosmosDbUtils.GetContainer("Person").GetItemQueryIterator<Person>(query);
 			var personList = new List<Person>();
 			while (queryIterator.HasMoreResults)
 			{
